@@ -11,20 +11,23 @@ resource "aws_lambda_function" "spiski_lambda" {
 
   environment {
     variables = {
-#      BUCKET_NAME   = aws_s3_bucket.spiski_bucket.bucket
-#      JSON_FILE_KEY = "db.json"
+      #      BUCKET_NAME   = aws_s3_bucket.spiski_bucket.bucket
+      #      JSON_FILE_KEY = "db.json"
     }
   }
 }
 
 resource "null_resource" "shell" {
+  triggers = {
+    all = join("", [for f in fileset("${path.module}/lambda_spiski/", "**"): filebase64sha256("${path.module}/lambda_spiski/${f}") ] )
+  }
   provisioner "local-exec" {
     command = "${path.module}/lambda_spiski/deps.sh"
   }
 }
 
 data "archive_file" "lambda_spiski_payload" {
-  depends_on = [null_resource.shell]
+  depends_on  = [null_resource.shell]
   type        = "zip"
   source_dir  = "${path.module}/delivery/lambda_spiski"
   output_path = "${path.module}/delivery/lambda_spiski_payload.zip"

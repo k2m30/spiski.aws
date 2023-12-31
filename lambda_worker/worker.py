@@ -13,46 +13,34 @@ def lambda_handler(event, context):
     sh = gc.open_by_key("1BcRguk-2-oczkrBZVcfN93eDnaMjAxTu5BJMJ2wyDn0")
 
     with open(filename, 'w', newline='') as f:
+        writer = csv.writer(f)
         for ws in sh.worksheets():
-            writer = csv.writer(f)
             rows = ws.get_values()
             if len(rows) < 1:
                 continue
-            # rows = rows[1:]
+            rows = rows[1:]
             for row in rows:
                 if row[0] == "":
                     continue
-                row[0] = row[1].split(" ")[0]
+                row[0] = row[1].split(" ")[0].lower()
                 writer.writerow(row)
             print(ws)
             print(len(rows))
-            # print(rows[-1])
 
-    # with open(filename, newline='') as input:
-    #     with open("db_sorted.csv", 'w', newline='') as output:
-    #         reader = csv.reader(input)
-    #         reader = sorted(reader, key=lambda row: row[0], reverse=False)
-    #         writer = csv.writer(output)
-    #         for row in reader:
-    #             row[0] = row[0].lower()
-    #             writer.writerow(row)
-    #
-
-
-
-
-    # with open(filename, 'w', newline='') as f:
-
-    # s3 = boto3.client('s3')
-    # empty_json_data = {"File": "Content",
-    #                    "Some": "Key"}
-    #
-    # s3.put_object(
-    #     Bucket=bucket_name,
-    #     Key=json_file_key,
-    #     Body=json.dumps(empty_json_data),
-    #     ContentType='application/json'
-    # )
+    with open(filename, newline='') as input:
+        with open("db_sorted.csv", 'w', newline='') as output:
+            reader = csv.reader(input)
+            reader = sorted(reader, key=lambda row: row[0], reverse=False)
+            writer = csv.writer(output)
+            writer.writerow(
+                ["short", "ФИО", "Год", "Сводка", "Отпустили", "Могилев", "Барановичи", "Жодино", "ИВС" "Окрестина",
+                 "ЦИП" "Окрестина", "РУВД", "Иное", "Больница", "Контакт", "Комментарий", "Фамилия", "Сутки", "Штраф",
+                 "Суд, судья, приговор", "Дата задержания", "Дата выхода", "Время выхода", "пол", "сутки в днях",
+                 "штрафы в базовых", "год"])
+            for row in reader:
+                if row[0] == "" or row[0][0] == "(" or row[0][0] == "?" or row[0][0] == "2":
+                    continue
+                writer.writerow(row)
 
     return {
         'statusCode': 200,
